@@ -6,11 +6,13 @@ import (
 	"math/rand"
 	"time"
 	"runtime"
+    "io/ioutil"
+	"path/filepath"
 )
 
 
 func main() {
-	runtime.GOMAXPROCS(2) // Define o uso de threads
+	runtime.GOMAXPROCS(4) // Define o uso de threads
 	rand.Seed(time.Now().UnixNano()) // Inicializa o gerador de números aleatórios
     fmt.Println("Teste de Grafos:")
 
@@ -284,5 +286,75 @@ func main() {
 	
 	fmt.Printf("\n\n  Diferença de Tempo (grafo com comunidades): Sequencial levou %s, Concorrente levou %s\n", seqTempoComComunidades, conTempoComComunidades)
 
+
+    // Caminho para a pasta com os arquivos .edges
+	diretorio := "./facebook"
+
+	// Lê todos os arquivos no diretório
+	arquivos, err := ioutil.ReadDir(diretorio)
+	if err != nil {
+		panic(err)
+	}
+
+	// Processa todos os arquivos .edges
+	for _, arquivo := range arquivos {
+		if filepath.Ext(arquivo.Name()) == ".edges" {
+			caminhoArquivo := filepath.Join(diretorio, arquivo.Name())
+			fmt.Printf("\nCarregando arquivo: %s\n\n", caminhoArquivo)
+
+			// Carrega o grafo
+			grafo := CarregarGrafoEdges(caminhoArquivo)
+
+         // Rodando o algoritmo Girvan-Newman no modo sequencial
+			fmt.Println("Executando Girvan-Newman (Sequencial)...")
+			inicioSequencial := time.Now()
+			comunidadesSequencial := girvanNewman(grafo, false)
+			tempoSequencial := time.Since(inicioSequencial)
+			fmt.Printf("Comunidades detectadas (Sequencial):\n")
+			imprimirComunidades(comunidadesSequencial)
+         fmt.Printf("Tempo de execução (Sequencial): %v\n", tempoSequencial)
+
+         fmt.Printf("\n")
+
+         // Rodando o algoritmo Girvan-Newman no modo concorrente
+			fmt.Println("Executando Girvan-Newman (Concorrente)...")
+			inicioConcorrente := time.Now()
+			comunidadesConcorrente := girvanNewman(grafo, true)
+			tempoConcorrente := time.Since(inicioConcorrente)
+			fmt.Printf("Comunidades detectadas (Concorrente):\n")
+			imprimirComunidades(comunidadesConcorrente)
+			fmt.Printf("Tempo de execução (Concorrente): %v\n", tempoConcorrente)
+			
+         fmt.Printf("\n\n\n")
+
+			
+		}
+	}
+
+    caminhoArquivo := "./email-Eu-core.txt"
+
+    fmt.Printf("Carregando grafo do arquivo: %s\n", caminhoArquivo)
+    grafo := CarregarGrafoTxt(caminhoArquivo)
+
+    // Processando o grafo com o algoritmo Girvan-Newman
+    fmt.Println("Executando Girvan-Newman (Sequencial)...")
+    inicioSequencial := time.Now()
+    comunidadesSequencial := girvanNewman(grafo, false)
+    tempoSequencial := time.Since(inicioSequencial)
+    fmt.Println("Comunidades detectadas (Sequencial):\n")
+    imprimirComunidades(comunidadesSequencial)
+    fmt.Printf("Tempo de execução (Sequencial): %v\n", tempoSequencial)
+
+    fmt.Printf("\n")
+
+    fmt.Println("Executando Girvan-Newman (Concorrente)...")
+    inicioConcorrente := time.Now()
+    comunidadesConcorrente := girvanNewman(grafo, true)
+    tempoConcorrente := time.Since(inicioConcorrente)
+    fmt.Println("Comunidades detectadas (Concorrente):")
+    imprimirComunidades(comunidadesConcorrente)
+    fmt.Printf("Tempo de execução (Concorrente): %v\n", tempoConcorrente)
+
+    fmt.Printf("\n\n\n")
 
 }
