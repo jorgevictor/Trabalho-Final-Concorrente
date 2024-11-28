@@ -14,13 +14,13 @@ import (
 func main() {
 	runtime.GOMAXPROCS(4) // Define o uso de threads
 	rand.Seed(time.Now().UnixNano()) // Inicializa o gerador de números aleatórios
-    fmt.Println("Teste de Grafos:")
+    fmt.Println("\nComparação de Desempenho entre Métodos Sequencial e Concorrente para Detecção de Comunidades em Grafos utilizando o Algoritmo Girvan-Newman")
 
     testes := []struct {
         nome  string
         grafo *Grafo
     }{
-        {"Ciclo pequeno com conexão", func() *Grafo {
+        {"Cíclico com conexão pequeno", func() *Grafo {
             g := NovoGrafo()
             g.AdicionarAresta(1, 2)
             g.AdicionarAresta(2, 3)
@@ -29,12 +29,14 @@ func main() {
             g.AdicionarAresta(3, 5)
             return g
         }()},
+
         {"Grafo desconexo pequeno", func() *Grafo {
             g := NovoGrafo()
             g.AdicionarAresta(1, 2)
             g.AdicionarAresta(3, 4)
             return g
         }()},
+
         {"Grafo linear pequeno", func() *Grafo {
             g := NovoGrafo()
             g.AdicionarAresta(1, 2)
@@ -42,6 +44,7 @@ func main() {
             g.AdicionarAresta(3, 4)
             return g
         }()},
+
         {"Grafo completo pequeno", func() *Grafo {
             g := NovoGrafo()
             g.AdicionarAresta(1, 2)
@@ -52,6 +55,7 @@ func main() {
             g.AdicionarAresta(3, 4)
             return g
         }()},
+
         {"Grafo raro pequeno", func() *Grafo {
             g := NovoGrafo()
             g.AdicionarAresta(1, 2)
@@ -59,6 +63,7 @@ func main() {
             g.AdicionarAresta(5, 6)
             return g
         }()},
+
         {"Grafo denso pequeno", func() *Grafo {
             g := NovoGrafo()
             for i := 1; i <= 5; i++ {
@@ -68,6 +73,7 @@ func main() {
             }
             return g
         }()},
+
         {"Grafo pequeno com comunidades", func() *Grafo {
             g := NovoGrafo()
             // Comunidade 1
@@ -82,6 +88,7 @@ func main() {
             g.AdicionarAresta(3, 4)
             return g
         }()},
+
         {"Grafo escalado médio", func() *Grafo {
             g := NovoGrafo()
             for i := 1; i <= 100; i++ {
@@ -116,9 +123,6 @@ func main() {
         })
     }
     
-
-    fmt.Println("\n\nTeste de Desempenho para grafos grandes:")
-
     
     grafoEscaladoGrande := func() *Grafo {
         g := NovoGrafo()
@@ -131,7 +135,11 @@ func main() {
         return g
     }()
     
-    fmt.Println("\n  Comunidades Detectadas no grafo escalado grande:")
+    fmt.Printf("\n\n")
+    fmt.Println(strings.Repeat("-", 40))
+    fmt.Println("  Grafo escalado grande:")
+    fmt.Println(strings.Repeat("-", 40))
+
     
     fmt.Printf("  Sequencial: ")
     seqTempoEscalado := medirTempoExecucao("Sequencial em Grafo escalado grande", func() {
@@ -172,8 +180,11 @@ func main() {
 	
 		return g
 	}()
-	
-	fmt.Println("\n  Comunidades Detectadas no Grafo Completo Grande:")
+
+    fmt.Printf("\n\n")
+    fmt.Println(strings.Repeat("-", 40))
+	fmt.Println("Grafo Completo Grande:")
+    fmt.Println(strings.Repeat("-", 40))
 	
 	// Teste Sequencial
 	fmt.Printf("  Sequencial: ")
@@ -235,8 +246,11 @@ func main() {
 		return g
 	}()
 	
-	
-	fmt.Println("\n  Comunidades Detectadas no Grafo Com Comunidades:")
+    fmt.Printf("\n\n")
+    fmt.Println(strings.Repeat("-", 40))
+	fmt.Println("Grafo Grande Com Comunidades:")
+    fmt.Println(strings.Repeat("-", 40))
+
 	
 	// Teste Sequencial
 	fmt.Printf("  Sequencial: ")
@@ -286,6 +300,10 @@ func main() {
 	
 	fmt.Printf("\n\n  Diferença de Tempo (grafo com comunidades): Sequencial levou %s, Concorrente levou %s\n", seqTempoComComunidades, conTempoComComunidades)
 
+    fmt.Printf("\n\n")
+    fmt.Println(strings.Repeat("-", 40))
+	fmt.Println("Grafo Facebook")
+    fmt.Println(strings.Repeat("-", 40))
 
     // Caminho para a pasta com os arquivos .edges
 	diretorio := "./facebook"
@@ -296,64 +314,64 @@ func main() {
 		panic(err)
 	}
 
-	// Processa todos os arquivos .edges
-	for _, arquivo := range arquivos {
-		if filepath.Ext(arquivo.Name()) == ".edges" {
-			caminhoArquivo := filepath.Join(diretorio, arquivo.Name())
-			fmt.Printf("\nCarregando arquivo: %s\n\n", caminhoArquivo)
+    // Processa todos os arquivos .edges
+    contador := 1
+    for _, arquivo := range arquivos {
+        if filepath.Ext(arquivo.Name()) == ".edges" {
+            caminhoArquivo := filepath.Join(diretorio, arquivo.Name())
 
-			// Carrega o grafo
-			grafo := CarregarGrafoEdges(caminhoArquivo)
+            println("\nArquivo:", contador)
+            contador = contador + 1
+
+            // Carrega o grafo
+            grafo := CarregarGrafoEdges(caminhoArquivo)
 
          // Rodando o algoritmo Girvan-Newman no modo sequencial
-			fmt.Println("Executando Girvan-Newman (Sequencial)...")
 			inicioSequencial := time.Now()
 			comunidadesSequencial := girvanNewman(grafo, false)
 			tempoSequencial := time.Since(inicioSequencial)
-			fmt.Printf("Comunidades detectadas (Sequencial):\n")
+            fmt.Printf("\n  Sequencial: ")
 			imprimirComunidades(comunidadesSequencial)
-         fmt.Printf("Tempo de execução (Sequencial): %v\n", tempoSequencial)
+         fmt.Printf("    Tempo: %v\n", tempoSequencial)
 
          fmt.Printf("\n")
 
          // Rodando o algoritmo Girvan-Newman no modo concorrente
-			fmt.Println("Executando Girvan-Newman (Concorrente)...")
 			inicioConcorrente := time.Now()
 			comunidadesConcorrente := girvanNewman(grafo, true)
 			tempoConcorrente := time.Since(inicioConcorrente)
-			fmt.Printf("Comunidades detectadas (Concorrente):\n")
+            fmt.Printf("\n  Concorrente: ")
 			imprimirComunidades(comunidadesConcorrente)
-			fmt.Printf("Tempo de execução (Concorrente): %v\n", tempoConcorrente)
+			fmt.Printf("    Tempo: %v\n", tempoConcorrente)
 			
-         fmt.Printf("\n\n\n")
-
-			
+         fmt.Printf("\n\n")
 		}
 	}
+    fmt.Printf("\n\n")
+    fmt.Println(strings.Repeat("-", 40))
+	fmt.Println("Grafo Email")
+    fmt.Println(strings.Repeat("-", 40))
 
     caminhoArquivo := "./email-Eu-core.txt"
 
-    fmt.Printf("Carregando grafo do arquivo: %s\n", caminhoArquivo)
     grafo := CarregarGrafoTxt(caminhoArquivo)
 
     // Processando o grafo com o algoritmo Girvan-Newman
-    fmt.Println("Executando Girvan-Newman (Sequencial)...")
     inicioSequencial := time.Now()
     comunidadesSequencial := girvanNewman(grafo, false)
     tempoSequencial := time.Since(inicioSequencial)
-    fmt.Println("Comunidades detectadas (Sequencial):\n")
+    fmt.Printf("\n  Sequencial: ")
     imprimirComunidades(comunidadesSequencial)
-    fmt.Printf("Tempo de execução (Sequencial): %v\n", tempoSequencial)
+    fmt.Printf("    Tempo: %v", tempoSequencial)
 
     fmt.Printf("\n")
 
-    fmt.Println("Executando Girvan-Newman (Concorrente)...")
     inicioConcorrente := time.Now()
     comunidadesConcorrente := girvanNewman(grafo, true)
     tempoConcorrente := time.Since(inicioConcorrente)
-    fmt.Println("Comunidades detectadas (Concorrente):")
+    fmt.Printf("\n  Concorrente: ")
     imprimirComunidades(comunidadesConcorrente)
-    fmt.Printf("Tempo de execução (Concorrente): %v\n", tempoConcorrente)
+    fmt.Printf("    Tempo: %v\n", tempoConcorrente)
 
     fmt.Printf("\n\n\n")
 
